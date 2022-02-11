@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hefu.admin.dao.SysUserDao">
+  <resultMap id="BaseResultMap" type="com.hefu.admin.entity.SysUser">
+    <id column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="web_dept_id" jdbcType="VARCHAR" property="webDeptId" />
+    <result column="employee_work_num" jdbcType="VARCHAR" property="employeeWorkNum" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="mobile" jdbcType="VARCHAR" property="mobile" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="company" jdbcType="VARCHAR" property="company" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    u.user_id, u.username, u.name, u.password, u.web_dept_id, u.employee_work_num, u.email, u.mobile,
+    u.status, u.company, u.create_time, u.update_time
+  </sql>
+
+  <select id="selectdeptEmployeeList" resultType="com.hefu.admin.entity.SysUser">
+    SELECT
+	    u.user_id,
+	    u.username,
+	    u.NAME,
+    FROM
+	sys_user u
+	LEFT JOIN sys_project_user pu ON u.user_id = pu.user_id
+    WHERE
+	    pu.project_id = #{projectId}
+	    AND u.web_dept_id = #{webDeptId}
+	    AND u.user_id != #{userId}
+	    AND u.`status` = 1
+  </select>
+    <select id="showEmployeeDetail" resultType="com.hefu.common.entity.EmployeeVO">
+    SELECT
+	    u.username,
+	    u.NAME,
+	    p.project_name,
+	    d.web_dept_name,
+	    u.mobile
+    FROM
+	    sys_user u
+	    LEFT JOIN sys_project_user pu ON u.user_id = pu.user_id
+	    LEFT JOIN project_information p ON p.project_id = pu.project_id
+	    LEFT JOIN web_dept d ON d.web_dept_id = u.web_dept_id
+    WHERE
+	    p.is_vaild = 1
+	AND u.`status` = 1
+	AND d.is_valid = 1
+	AND p.project_id = #{projectId}
+	AND u.user_id = #{userId}
+    </select>
+	<select id="selectEmployeePage" resultType="com.hefu.common.entity.EmployeeVO">
+	SELECT
+		u.NAME,
+		d.web_dept_name,
+		u.employee_work_num,
+		u.mobile
+	FROM
+		sys_user u
+	LEFT JOIN web_dept d ON u.web_dept_id = d.web_dept_id
+	LEFT JOIN sys_project_user pu ON u.user_id = pu.user_id
+	WHERE
+		d.is_valid = 1
+	AND u.`status` = 1
+	AND pu.project_id = #{projectId}
+	AND d.web_dept_id = #{webDeptId}
+	AND d.dept_flag = 1
+	</select>
+	<select id="selectCountByDeptAndProject" resultType="java.lang.Integer">
+	SELECT
+		count(1)
+	FROM
+		sys_user u
+	RIGHT JOIN (
+		SELECT
+			u.user_id
+		FROM
+		sys_user u
+		LEFT JOIN sys_project_user pu ON u.user_id = pu.user_id
+		LEFT JOIN web_dept d ON d.web_dept_id = u.web_dept_id
+	WHERE
+		u.STATUS = 1
+		AND d.web_dept_id = #{webDeptId}
+		AND pu.project_id = #{projectId}
+	) uu ON u.user_id = uu.user_id
+	</select>
+    <select id="selectAdminAllInfo" resultType="com.hefu.admin.vo.AdminInfoVO">
+		SELECT
+			user_id,
+			NAME,
+			web_dept_name,
+			employee_work_num,
+			email,
+			mobile,
+			company
+		FROM
+			sys_user u
+		INNER JOIN web_dept d ON u.web_dept_id = d.web_dept_id
+		where u.user_id=#{userId} and u.`status`=1
+	</select>
+	<select id="selectUserData" resultType="com.hefu.common.entity.EmployeeVO">
+		SELECT
+			u.NAME,
+			d.web_dept_name,
+			u.employee_work_num,
+			u.mobile
+		FROM
+			sys_user u
+		LEFT JOIN sys_project_user pu ON u.user_id = pu.user_id
+		LEFT JOIN web_dept d on u.web_dept_id=d.web_dept_id
+	WHERE
+		u.`status` = 1
+	AND pu.project_id = #{projectId}
+	AND u.web_dept_id = #{webDeptId}
+	limit #{page},#{size}
+	</select>
+
+	<select id="countEmployee" parameterType="hashmap" resultType="java.lang.Integer">
+	SELECT
+		count(1)
+	FROM
+		sys_user u
+		<if test="projectId != null and projectId != ''">
+			inner join sys_project_user sp on sp.project_id = #{projectId}
+		</if>
+	WHERE
+		u.`status` = 1
+	</select>
+
+	<select id="selectUserDatas" parameterType="hashmap" resultType="com.hefu.admin.vo.SysUserVO">
+		SELECT
+		<include refid="Base_Column_List" />
+		,s.role_sign
+
+		FROM sys_user u
+
+		<if test="projectId != null and projectId != ''">
+			INNER JOIN sys_project_user sp on sp.project_id = #{projectId} and sp.user_id = u.user_id
+		</if>
+
+		LEFT JOIN sys_user_role r on u.user_id = r.user_id
+
+		LEFT JOIN sys_role s on r.role_id = s.role_id
+
+		WHERE
+			u.`status` = 1
+		<if test="page != null and size != null">
+			limit #{page},#{size}
+		</if>
+	</select>
+
+	<select id="selectUserList" parameterType="hashmap" resultType="com.hefu.admin.dto.UserDto">
+		SELECT
+			u.user_id, u.username, u.name, u.password, u.employee_work_num, u.email, u.mobile,
+			u.status, u.company, u.position, u.create_time, u.update_time
+			,s.role_name, s.role_sign, w.web_dept_name
+
+		FROM sys_user u
+
+		LEFT JOIN sys_user_role r on u.user_id = r.user_id
+
+		LEFT JOIN sys_role s on r.role_id = s.role_id
+
+		LEFT JOIN web_dept w on u.web_dept_id = w.web_dept_id
+
+		<if test="page != null and size != null">
+			limit #{page},#{size}
+		</if>
+	</select>
+</mapper>

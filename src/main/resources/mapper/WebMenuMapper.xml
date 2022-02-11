@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hefu.auth.dao.WebMenuDao">
+    <resultMap id="BaseResultMap" type="com.hefu.auth.entity.WebMenu">
+        <id column="web_menu_id" jdbcType="INTEGER" property="webMenuId" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+        <result column="parent_id" jdbcType="INTEGER" property="parentId" />
+        <result column="component" jdbcType="VARCHAR" property="component" />
+        <result column="path" jdbcType="VARCHAR" property="path" />
+        <result column="perms" jdbcType="VARCHAR" property="perms" />
+        <result column="menu_type" jdbcType="TINYINT" property="menuType" />
+        <result column="is_valid" jdbcType="TINYINT" property="isValid" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+        <result column="remark" jdbcType="VARCHAR" property="remark" />
+    </resultMap>
+    <select id="selectSysMenuByUserId" resultType="java.lang.String">
+     SELECT
+	    m.perms
+     FROM
+	    web_menu m
+	    LEFT JOIN web_role_menu rm ON rm.web_menu_id = m.web_menu_id
+		LEFT JOIN sys_user_role ur on ur.role_id=rm.role_id
+    WHERE
+	    ur.user_id = #{userId}
+	AND m.is_valid = 1
+    </select>
+    <select id="selectMenuTreeByUserId" resultMap="BaseResultMap">
+        select
+        m.name,m.web_menu_id,m.component,m.path,m.parent_id
+        from web_menu m
+        left join web_role_menu wrm on m.web_menu_id = wrm.web_menu_id
+        left join sys_user_role sur on wrm.role_id = sur.role_id
+        where sur.user_id=#{userId} and m.menu_type=1 order by m.web_menu_id asc
+    </select>
+    <select id="selectAllMenu" resultType="java.lang.Integer">
+        select web_menu_id from web_menu
+    </select>
+
+</mapper>

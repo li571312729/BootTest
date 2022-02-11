@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hefu.admin.dao.WebDeptDao">
+  <resultMap id="BaseResultMap" type="com.hefu.admin.entity.WebDept">
+    <id column="web_dept_id" jdbcType="INTEGER" property="webDeptId" />
+    <result column="web_dept_name" jdbcType="VARCHAR" property="webDeptName" />
+    <result column="web_dept_remark" jdbcType="VARCHAR" property="webDeptRemark" />
+    <result column="is_valid" jdbcType="TINYINT" property="isValid" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    web_dept_id, web_dept_name, role_id, web_dept_remark, is_valid, create_time, update_time
+  </sql>
+  <select id="selectProjectListCount" resultType="com.hefu.common.entity.CountDept">
+    SELECT
+	    d.web_dept_id,
+	    d.web_dept_name,
+	    count( u.user_id ) as count
+    FROM
+	    sys_user u
+	LEFT JOIN web_dept d ON d.web_dept_id = u.web_dept_id
+    WHERE
+	    user_id IN ( SELECT user_id FROM sys_project_user WHERE project_id = #{projectId} AND user_id != #{userId} )
+	    AND u.`status` = 1
+	    AND d.is_valid = 1
+    GROUP BY
+	    d.web_dept_id
+  </select>
+
+</mapper>
