@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hefu.admin.dao.ProjectInformationDao">
+    <resultMap id="BaseResultMap" type="com.hefu.admin.entity.ProjectInformation">
+        <id column="project_id" jdbcType="INTEGER" property="projectId"/>
+        <result column="project_name" jdbcType="VARCHAR" property="projectName"/>
+        <result column="project_type" jdbcType="VARCHAR" property="projectType"/>
+        <result column="project_cost" jdbcType="VARCHAR" property="projectCost"/>
+        <result column="project_aera" jdbcType="VARCHAR" property="projectAera"/>
+        <result column="plan_date" jdbcType="TIMESTAMP" property="planDate"/>
+        <result column="plan_fin_date" jdbcType="TIMESTAMP" property="planFinDate"/>
+        <result column="is_vaild" jdbcType="INTEGER" property="isVaild"/>
+        <result column="cons_unit" jdbcType="VARCHAR" property="consUnit"/>
+        <result column="devp_unit" jdbcType="VARCHAR" property="devpUnit"/>
+        <result column="version_unit" jdbcType="VARCHAR" property="versionUnit"/>
+        <result column="design_unit" jdbcType="VARCHAR" property="designUnit"/>
+        <result column="survey_unit" jdbcType="VARCHAR" property="surveyUnit"/>
+        <result column="project_ad" jdbcType="VARCHAR" property="projectAd"/>
+        <result column="province" jdbcType="VARCHAR" property="province"/>
+        <result column="project_thum_ad" jdbcType="VARCHAR" property="projectThumAd"/>
+        <result column="project_map" jdbcType="VARCHAR" property="projectMap"/>
+        <result column="project_info" jdbcType="VARCHAR" property="projectInfo"/>
+        <result column="figure" jdbcType="BIGINT" property="figure"/>
+        <result column="project_completion" jdbcType="VARCHAR" property="projectCompletion"/>
+        <result column="project_mananger" jdbcType="VARCHAR" property="projectMananger"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        project_id, project_name, project_type, project_cost, project_aera, plan_date, plan_fin_date,
+        is_vaild, cons_unit, devp_unit, version_unit, design_unit, survey_unit, project_ad,
+        province, project_thum_ad, project_map, project_info, figure, project_completion,
+        project_mananger, create_time, phone, user_id
+    </sql>
+
+    <select id="selectProjectListByUserId" resultType="com.hefu.admin.entity.ProjectInformation">
+        SELECT
+        p.project_id,
+        p.project_name,
+        p.figure,
+        p.create_time
+        FROM
+        project_information p
+        LEFT JOIN sys_project_user pu ON p.project_id = pu.project_id
+        WHERE
+        pu.user_id = #{userId}
+        AND p.is_vaild = 1
+        ORDER BY p.create_time DESC
+    </select>
+    <select id="selectProjectByName" resultType="com.hefu.admin.entity.ProjectInformation">
+        SELECT
+        p.project_id,
+        p.project_name,
+        p.project_map,
+        p.project_completion
+        FROM
+        project_information p
+        INNER JOIN
+        sys_project_user pu
+        ON
+        p.project_id = pu.project_id
+        WHERE
+        p.is_vaild = 1 AND pu.user_id = #{userId}
+        <if test="projectName != '' and projectName != null">
+            AND p.project_name LIKE CONCAT('%',#{projectName}, '%')
+        </if>
+        ORDER BY p.create_time Desc, p.project_name ASC
+    </select>
+
+    <select id="selectListConsUnits" resultType="java.lang.String">
+        SELECT DISTINCT cons_unit FROM project_information
+    </select>
+
+    <!-- 显示用户关联的项目信息-荷福行为监控系统 -->
+    <select id="selectMProjectListByUserId" resultType="com.hefu.admin.entity.ProjectInformation">
+        SELECT
+        <include refid="projectInfo"/>
+        FROM
+        project_information p
+        INNER JOIN m_project_user mp ON p.project_id = mp.project_id
+        WHERE
+        mp.user_id = #{userId}
+        AND p.is_vaild = 1
+        ORDER BY p.create_time DESC
+    </select>
+    <select id="areaList" resultType="com.hefu.admin.entity.ProjectArea">
+        SELECT
+        sp.area,
+        count(p.project_id) count
+        FROM
+        project_information p
+        INNER JOIN sc_province sp ON p.province = sp.name
+        WHERE
+        p.is_vaild = 1
+        GROUP BY sp.area
+        HAVING count(p.project_id) > 0
+        ORDER BY sp.area ASC
+    </select>
+
+    <select id="monitor" resultType="com.hefu.admin.entity.ProjectInformation">
+        SELECT
+        p.project_id,
+        p.project_name,
+        p.project_completion,
+        sp.`name`,
+        sp.area
+        FROM
+        project_information p
+        INNER JOIN sc_province sp ON p.province = sp.name
+        WHERE
+        p.is_vaild = 1
+        ORDER BY sp.area ASC
+    </select>
+
+    <sql id="projectCondition">
+        <if test="mProjectSearchDTO.projectName != '' and mProjectSearchDTO.projectName != null">
+            AND p.project_name LIKE CONCAT('%', #{mProjectSearchDTO.projectName}, '%')
+        </if>
+        <if test="mProjectSearchDTO.consUnit != '' and mProjectSearchDTO.consUnit != null">
+            AND p.cons_unit LIKE CONCAT('%', #{mProjectSearchDTO.consUnit}, '%')
+        </if>
+        <if test="mProjectSearchDTO.province != '' and mProjectSearchDTO.province != null">
+            AND p.province = #{mProjectSearchDTO.province}
+        </if>
+        <if test="mProjectSearchDTO.area != '' and mProjectSearchDTO.area != null">
+            AND p.project_thum_ad = #{mProjectSearchDTO.area}
+        </if>
+        <if test="mProjectSearchDTO.projectCompletion != '' and mProjectSearchDTO.projectCompletion != null">
+            AND p.project_completion = #{mProjectSearchDTO.projectCompletion}
+        </if>
+        <if test="mProjectSearchDTO.projectId != '' and mProjectSearchDTO.projectId != null">
+            AND p.project_id = #{mProjectSearchDTO.projectId}
+        </if>
+        <if test="mProjectSearchDTO.createTime != '' and mProjectSearchDTO.createTime != null">
+            AND p.create_time >= #{mProjectSearchDTO.createTime}
+        </if>
+        <if test="mProjectSearchDTO.endTime != '' and mProjectSearchDTO.endTime != null">
+            AND p.create_time &lt;= #{mProjectSearchDTO.endTime}
+        </if>
+        <if test="mProjectSearchDTO.userId != '' and mProjectSearchDTO.userId != null">
+            AND p.user_id = #{mProjectSearchDTO.userId}
+        </if>
+    </sql>
+
+    <sql id="projectInfo">
+        p.project_id AS `projectId`,
+        p.project_name AS `projectName`,
+        p.project_type AS `projectType`,
+        p.project_cost AS `projectCost`,
+        p.project_aera AS `projectAera`,
+        p.plan_date AS `planDate`,
+        p.plan_fin_date AS `planFinDate`,
+        p.is_vaild AS `isVaild`,
+        p.cons_unit AS `consUnit`,
+        p.devp_unit AS `devpUnit`,
+        p.version_unit AS `versionUnit`,
+        p.design_unit AS `designUnit`,
+        p.survey_unit AS `surveyUnit`,
+        p.project_ad AS `projectAd`,
+        p.province AS `province`,
+        p.project_thum_ad AS `projectThumAd`,
+        p.project_map AS `projectMap`,
+        p.project_info AS `projectInfo`,
+        p.figure AS `figure`,
+        p.project_completion AS `projectCompletion`,
+        p.project_mananger AS `projectMananger`,
+        p.create_time AS `createTime`,
+        p.phone AS `phone`,
+        p.user_id AS `userId`,
+        p.is_crossfire AS `isCrossfire`
+    </sql>
+</mapper>

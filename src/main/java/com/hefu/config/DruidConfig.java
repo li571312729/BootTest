@@ -1,30 +1,27 @@
 package com.hefu.config;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.support.http.StatViewServlet;
 import com.alibaba.druid.support.http.WebStatFilter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * druid监控配置
+ * druid监控配置 多数据源后这个配置可能不起效果了
  * @author Administrator
  */
 @Configuration
 public class DruidConfig {
 
-    @ConfigurationProperties(prefix = "spring.datasource")
-    @Bean
-    public DataSource druid(){
-        return new DruidDataSource();
-    }
+    //@ConfigurationProperties(prefix = "spring.datasource")
+    //@Bean
+    //public DataSource druid(){
+    //    return new DruidDataSource();
+    //}
 
     //  配置Druid的监控
     //  配置管理后台的servlet

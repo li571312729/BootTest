@@ -1,5 +1,6 @@
 package com.hefu.admin.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -201,6 +202,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUser> impleme
     @Override
     public List<UserDto> selectUserList(Map<String, Object> map) {
         return sysUserDao.selectUserList(map);
+    }
+
+    @Override
+    public List<SysUser> getMasterUserList() {
+        return sysUserDao.selectList(new QueryWrapper<>());
+    }
+
+    @DS("slave_1")
+    @Override
+    public List<SysUser> getSlaveUserList() {
+        return sysUserDao.selectList(new QueryWrapper<>());
     }
 
 }

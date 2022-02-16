@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -56,6 +57,21 @@ public class PersonalCenterController {
 
     public final String PHONE_REGEX = "^((13[0-9])|(14[5,7,9])|(15([0-3]|[5-9]))|(166)|(17[0,1,3,5,6,7,8])|(18[0-9])|(19[8|9]))\\d{8}$";
 
+    @ApiOperation(value = "master根据用户名获取用户")
+    @GetMapping("/getMasterUserList")
+    public Result ResultgetMasterUserList(){
+        List<SysUser> masterUserList = sysUserService.getMasterUserList();
+        log.info("masterUserList:{}", masterUserList);
+        return Result.success(masterUserList);
+    }
+
+    @ApiOperation(value = "slave_1根据用户名获取用户")
+    @RequestMapping(value = "getUserList",method = RequestMethod.GET)
+    public Result getUserList(){
+        List<SysUser> slaveUserList = sysUserService.getSlaveUserList();
+        log.info("slaveUserList:{}", slaveUserList);
+        return Result.success(slaveUserList);
+    }
 
     @ApiOperation(value = "查询当前用户个人信息")
     @GetMapping("/")

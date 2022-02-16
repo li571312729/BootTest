@@ -44,4 +44,10 @@ public interface SysUserService extends IService<SysUser> {
 
     // 查询所有用户详细信息
     List<UserDto> selectUserList(Map<String, Object> map);
+
+    // 多数据源 查看主数据源用户列表
+    List<SysUser> getMasterUserList();
+
+    // 多数据源 查看从数据源用户列表
+    List<SysUser> getSlaveUserList();
 }
