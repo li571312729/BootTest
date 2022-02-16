@@ -54,7 +54,7 @@ public class RemoveDruidAdvertisingConfig {
             @Override
             public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
                 chain.doFilter(request, response);
-                response.resetBuffer();
+                // response.resetBuffer();
                 /**
                  * 获取common文件内容
                  */
